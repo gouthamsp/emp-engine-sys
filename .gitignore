@@ -1,0 +1,10 @@
+# Installed Dependencies
+node_modules/
+
+# Lock files
+.*lock*
+
+# Temporary Files
+
+
+# Local Directories
