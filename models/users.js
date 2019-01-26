@@ -4,34 +4,20 @@
 
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
+const sha256 = require('sha256');
+const common = require('../routes/common');
 
 var userSchema = new mongoose.Schema({
 
     name: 'string',
     address: 'string',
     email: 'string',
+    password: 'string',
     phone: 'string',
     bloodGroup: 'string'
 });
 
 var UserModel = mongoose.model('user', userSchema);
-
-
-
-function createUser(name, address, email, phone, bloodGroup) {
-    const newUserObject = new UserModel({
-        name: name,
-        address: address,
-        email: email,
-        phone: phone,
-        bloodGroup: bloodGroup
-    });
-    newUserObject.save();
-    console.log(newUserObject)
-
-    // const createdUser = UserModel.findOne({email: email});
-    // console.log('Created User is', createdUser);
-}
 
 
 function deleteUser(emailAddress) {
@@ -45,18 +31,19 @@ function deleteUser(emailAddress) {
 }
 
 
-function modifyUser(userId, name, address, email, phone, bloodGroup) {
+function modifyUser(userId, name, address, email, password, phone, bloodGroup) {
     UserModel.findOneAndUpdate({userId: ObjectId(userId)}, {
         name: name,
         email: email,
         address: address,
+        password: sha256(password),
         phone: phone,
         bloodGroup: bloodGroup
     });
 }
 
 module.exports = {
-    createUser: createUser,
     modifyUser: modifyUser,
-    deleteUser: deleteUser
+    deleteUser: deleteUser,
+    UserModel: UserModel
 };

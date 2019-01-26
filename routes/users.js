@@ -1,6 +1,8 @@
 var express = require('express');
 var router = express.Router();
-const userModel = require('../models/users')
+const sha256 = require('sha256');
+const userModel = require('../models/users');
+const common = require('./common');
 
 /* GET users listing. */
 router.post('/', function(req, res, next) {
@@ -16,21 +18,52 @@ router.post('/', function(req, res, next) {
 
 router.get('/', (req, res) => {
   res.send('This URL Does not support get requests!')
-})
+});
 
 
 /* Create a new User -- endpoint --> /users/createUser/ POST */
 
 router.post('/createUser/', (req, res) => {
   console.log('Request Body:', req.body)
-  // console.log('request ', req)
-  const email = req.body.email
-  const name = req.body.name
-  const phone = req.body.phone
-  const address = req.body.address
-  const bloodGroup = req.body.bloodGroup
-  userModel.createUser(name, address, email, phone, bloodGroup)
-  res.send('User created!')
-})
+  const newUserObject = new userModel.UserModel({
+    name: req.body.name,
+    address: req.body.address,
+    email: req.body.email,
+    password: sha256(req.body.password),
+    phone: req.body.phone,
+    bloodGroup: req.body.bloodGroup
+  });
+  newUserObject.save();
+  console.log(newUserObject);
+  res.send(common.generateResponse(0, { userId: newUserObject._id }));
+});
+
+
+router.post('/signIn', (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  userModel.UserModel.findOne({ email: email }, (err, usr) => {
+    if (err || !usr) {
+      console.log('Error finding user or user does not exisit --> ', err);
+      res.send(common.generateResponse(3));
+    } else {
+      const encodedUserPassword = usr.password;
+      if (sha256(password) === encodedUserPassword) {
+        console.log('Passwords matches');
+        console.log('User email: ', usr.email);
+        common.generateUserToken(usr._id, res);
+      } else {
+        res.send(common.generateResponse(2));
+      }
+    }
+  });
+});
+
+
+router.post('/signOut', (req, res) => {
+  const token = req.body.token;
+  console.log('Token: ', token);
+  common.decodeUserToken(token, res);
+});
 
 module.exports = router;
