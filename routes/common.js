@@ -9,7 +9,8 @@ const code_gen = {
     0: 'Success',
     1: 'Error',
     2: 'Invalid Password',
-    3: 'Invalid email or User does not exisit'
+    3: 'Invalid email or User does not exisit',
+    4: 'Logout successfull'
 };
 function generateResponse(code, result, message) {
     if (!message) {
@@ -24,14 +25,14 @@ function generateResponse(code, result, message) {
 
 
 /* Decodes a token for all the info within the token */
-function decodeUserToken(token, res) {
+function decodeUserToken(token) {
     const decodedToken = jsonwebtoken.decode(token);
     if (!decodedToken) {
         console.log('Invalid token');
-        res.send(generateResponse(1));
+        return null;
     } else {
         console.log('Decoded payload: ', decodedToken);
-        res.send(generateResponse(0));
+        return decodedToken;
     }
 }
 
@@ -54,6 +55,7 @@ function generateUserToken(userId, res) {
             }
             const generatedToken = jsonwebtoken.sign(payload, environmentVariables.apiIdentifier);
             console.log('Generated Token is : ', generatedToken);
+            // TODO: Record User Signin here
             res.send(generateResponse(0, { token: generatedToken }));
         }
     });

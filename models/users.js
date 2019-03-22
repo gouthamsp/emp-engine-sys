@@ -5,10 +5,8 @@
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
 const sha256 = require('sha256');
-const common = require('../routes/common');
 
 var userSchema = new mongoose.Schema({
-
     name: 'string',
     address: 'string',
     email: 'string',

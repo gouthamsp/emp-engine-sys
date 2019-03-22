@@ -61,9 +61,19 @@ router.post('/signIn', (req, res) => {
 
 
 router.post('/signOut', (req, res) => {
-  const token = req.body.token;
-  console.log('Token: ', token);
-  common.decodeUserToken(token, res);
+  const token = req.headers.authorization;
+  const decodedInfo = common.decodeUserToken(token);
+  const userId = decodedInfo._id;
+
+  userModel.UserModel.findById(userId, (err, usr) => {
+    if (err || !usr) {
+      console.log('Error finding user or User doesnot exist --> ', err);
+      res.send(common.generateResponse(3));
+    } else {
+      // TODO: Record user Sign out here
+      res.send(common.generateResponse(0));
+    }
+  });
 });
 
 module.exports = router;
